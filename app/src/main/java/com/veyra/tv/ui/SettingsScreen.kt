@@ -234,7 +234,7 @@ fun SettingsScreen(
                     subtitle = "How we handle your data",
                     icon = Icons.Default.PrivacyTip,
                     isTv = isTv,
-                    onClick = { openUrl(context, "https://veyra.tv/privacy") }
+                    onClick = { openUrl(context, "https://Shyam-vadgama.github.io/veyra-tv/privacy.html") }
                 )
             }
             item {
@@ -243,7 +243,7 @@ fun SettingsScreen(
                     subtitle = "Agreement for using the app",
                     icon = Icons.Default.Description,
                     isTv = isTv,
-                    onClick = { openUrl(context, "https://veyra.tv/terms") }
+                    onClick = { openUrl(context, "https://Shyam-vadgama.github.io/veyra-tv/terms.html") }
                 )
             }
         }
