@@ -270,9 +270,9 @@ fun SettingsRow(
     onClick: (() -> Unit)? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isTv && isFocused) 1.02f else 1f, label = "RowScale")
-    val backgroundColor = if (isTv && isFocused) Color.White.copy(alpha = 0.1f) else Color.Transparent
-    val borderColor = if (isTv && isFocused) MaterialTheme.colorScheme.primary else Color.Transparent
+    val scale by animateFloatAsState(if (isFocused) 1.02f else 1f, label = "RowScale")
+    val backgroundColor = if (isFocused) Color.White.copy(alpha = 0.1f) else Color.Transparent
+    val borderColor = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent
 
     Surface(
         modifier = Modifier
@@ -343,7 +343,7 @@ fun PreferenceDropdownRow(
     onOptionSelected: (String) -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isTv && isFocused) 1.02f else 1f, label = "RowScale")
+    val scale by animateFloatAsState(if (isFocused) 1.02f else 1f, label = "RowScale")
 
     Box(
         modifier = Modifier
@@ -363,8 +363,8 @@ fun PreferenceDropdownRow(
                     .focusable()
                     .clip(RoundedCornerShape(12.dp))
                     .clickable { onExpandedChange(!expanded) },
-                color = if (isTv && isFocused) Color.White.copy(alpha = 0.1f) else Color.Transparent,
-                border = BorderStroke(2.dp, if (isTv && isFocused) MaterialTheme.colorScheme.primary else Color.Transparent),
+                color = if (isFocused) Color.White.copy(alpha = 0.1f) else Color.Transparent,
+                border = BorderStroke(2.dp, if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Row(

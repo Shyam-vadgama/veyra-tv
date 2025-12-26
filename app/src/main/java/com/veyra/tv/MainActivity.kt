@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.zIndex
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -163,11 +164,8 @@ fun HomeScreen(
     var showCategoryDialog by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
-    LaunchedEffect(pagedChannels.itemCount) {
-        if (isTv && searchQueryText.isNotEmpty() && pagedChannels.itemCount > 0) {
-            gridFocusRequester.requestFocus()
-        }
-    }
+    // Removed the LaunchedEffect that stole focus on search results update
+    // This allows the user to keep typing without the keyboard closing
 
     Scaffold(
         topBar = {
@@ -488,12 +486,14 @@ fun RecentChannelsSlider(
 @Composable
 fun RecentChannelItem(channel: Channel, onClick: () -> Unit, isTv: Boolean) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (isTv && isFocused) 1.1f else 1f, label = "RecentScale")
+    val scale by animateFloatAsState(if (isFocused) 1.15f else 1f, label = "RecentScale")
+    val zIndex = if (isFocused) 1f else 0f
     
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(120.dp)
+            .zIndex(zIndex)
             .scale(scale)
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
@@ -501,7 +501,8 @@ fun RecentChannelItem(channel: Channel, onClick: () -> Unit, isTv: Boolean) {
     ) {
         Card(
             shape = RoundedCornerShape(12.dp),
-            border = if (isTv && isFocused) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+            border = if (isFocused) BorderStroke(3.dp, Color.White) else null,
+            elevation = CardDefaults.cardElevation(defaultElevation = if (isFocused) 8.dp else 2.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
             modifier = Modifier
                 .size(100.dp)
@@ -765,7 +766,8 @@ fun SearchBar(
     
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
-    val scale by animateFloatAsState(targetValue = if (isTv && isFocused) 1.02f else 1f, label = "SearchScale")
+    val scale by animateFloatAsState(targetValue = if (isFocused) 1.02f else 1f, label = "SearchScale")
+    val zIndex = if (isFocused) 1f else 0f
     
     // Debounce the update to the parent
     LaunchedEffect(textState) {
@@ -775,7 +777,7 @@ fun SearchBar(
         }
     }
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier.zIndex(zIndex)) {
         OutlinedTextField(
             value = textState,
             onValueChange = { textState = it },
@@ -801,7 +803,7 @@ fun SearchBar(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFF2B2B2B),
                 unfocusedContainerColor = Color(0xFF2B2B2B),
-                focusedBorderColor = if (isTv) Color.White else MaterialTheme.colorScheme.primary, // High contrast for TV
+                focusedBorderColor = if (isFocused) Color.White else MaterialTheme.colorScheme.primary, // High contrast for TV
                 unfocusedBorderColor = Color.Transparent,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedTextColor = Color.White,
@@ -852,10 +854,11 @@ fun CategoryChip(
     icon: ImageVector? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if ((isTv && isFocused) || isSelected) 1.1f else 1f, label = "ChipScale")
+    val scale by animateFloatAsState(if (isFocused || isSelected) 1.1f else 1f, label = "ChipScale")
     val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color(0xFF2B2B2B)
     val contentColor = if (isSelected) Color.White else Color.Gray
-    val border = if (isTv && isFocused) BorderStroke(2.dp, Color.White) else null
+    val border = if (isFocused) BorderStroke(3.dp, Color.White) else null
+    val zIndex = if (isFocused) 1f else 0f
 
     Surface(
         onClick = onClick,
@@ -864,6 +867,7 @@ fun CategoryChip(
         border = border,
         modifier = Modifier
             .height(36.dp)
+            .zIndex(zIndex)
             .scale(scale)
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
@@ -899,16 +903,18 @@ fun ChannelGridItem(
     isTv: Boolean
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(targetValue = if (isTv && isFocused) 1.1f else 1.0f, label = "CardScale")
+    val scale by animateFloatAsState(targetValue = if (isFocused) 1.1f else 1.0f, label = "CardScale")
     // Use White for TV focus to ensure visibility against dark backgrounds
-    val border = if (isTv && isFocused) BorderStroke(3.dp, Color.White) else BorderStroke(1.dp, Color(0xFF2B2B2B))
+    val border = if (isFocused) BorderStroke(3.dp, Color.White) else BorderStroke(1.dp, Color(0xFF2B2B2B))
+    val zIndex = if (isFocused) 1f else 0f
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f) // Cinematic Aspect Ratio
+            .zIndex(zIndex) // Ensure focused item draws on top
+            .onFocusChanged { isFocused = it.hasFocus }
             .focusable()
-            .onFocusChanged { isFocused = it.isFocused }
             .scale(scale)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
@@ -1014,18 +1020,20 @@ fun ChannelGridItemSkeleton() {
 @Composable
 fun HeroSection(channel: Channel, onClick: () -> Unit, isTv: Boolean) {
     var isFocused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(targetValue = if (isTv && isFocused) 1.05f else 1f, label = "HeroScale")
+    val scale by animateFloatAsState(targetValue = if (isFocused) 1.05f else 1f, label = "HeroScale")
+    val zIndex = if (isFocused) 1f else 0f
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(220.dp)
             .padding(bottom = 16.dp)
+            .zIndex(zIndex)
             .scale(scale)
             .clip(RoundedCornerShape(16.dp))
-            .border(3.dp, if (isTv && isFocused) Color.White else Color.Transparent, RoundedCornerShape(16.dp))
+            .border(3.dp, if (isFocused) Color.White else Color.Transparent, RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-            .onFocusChanged { isFocused = it.isFocused }
+            .onFocusChanged { isFocused = it.hasFocus }
             .focusable()
             .clickable(onClick = onClick)
     ) {
