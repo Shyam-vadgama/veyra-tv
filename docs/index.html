@@ -3,93 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veyra TV - Open Source IPTV Player</title>
-    <meta name="description" content="A modern, open-source IPTV player for Android and TV. Secure, fast, and beautiful.">
+    <title>Veyra TV - The Ultimate Open Source IPTV Player</title>
+    <meta name="description" content="Experience buffer-free streaming with Veyra TV. The modern, open-source IPTV player designed for privacy and performance.">
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
+    <!-- Ambient Glow Background -->
+    <div class="background-glow"></div>
+
     <nav>
         <div class="logo">Veyra TV</div>
         <div class="nav-links">
             <a href="#features">Features</a>
-            <a href="https://github.com/Shyam-vadgama/veyra-tv" target="_blank">GitHub</a>
             <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="https://github.com/Shyam-vadgama/veyra-tv" class="nav-cta">GitHub</a>
         </div>
     </nav>
 
     <section class="hero">
-        <h1>Your Media, <br> Your Rules.</h1>
-        <p>A modern, open-source IPTV player built for performance and privacy. Experience your content in a clean, distraction-free environment.</p>
-        <div class="cta-buttons">
-            <a href="https://github.com/Shyam-vadgama/veyra-tv/releases" class="btn btn-primary">Download APK</a>
-            <a href="https://github.com/Shyam-vadgama/veyra-tv" class="btn btn-secondary">View Source</a>
+        <div class="hero-content fade-in-up">
+            <span class="badge">v1.1 Released</span>
+            <h1>Streaming <br> <span>Redefined.</span></h1>
+            <p>A high-performance, open-source media engine for your personal content. Built with Media3 & Jetpack Compose for a cinematic experience on Android & TV.</p>
+            
+            <div class="hero-btns">
+                <a href="https://github.com/Shyam-vadgama/veyra-tv/releases" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download APK
+                </a>
+                <a href="https://github.com/Shyam-vadgama/veyra-tv" class="btn btn-secondary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    Source Code
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-visual fade-in-up" style="transition-delay: 0.2s;">
+            <div class="device-mockup">
+                <div class="screen-content">
+                    <div class="mock-nav">
+                        <div class="mock-time"></div>
+                        <div class="mock-batt"></div>
+                    </div>
+                    <div class="mock-hero">
+                        <div class="mock-play-btn"></div>
+                    </div>
+                    <div class="mock-row">
+                        <div class="mock-card"></div>
+                        <div class="mock-card" style="opacity: 0.5;"></div>
+                        <div class="mock-card" style="opacity: 0.3;"></div>
+                    </div>
+                    <div class="mock-row">
+                        <div class="mock-card" style="opacity: 0.8;"></div>
+                        <div class="mock-card" style="opacity: 0.4;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
     <section id="features" class="features">
-        <h2 class="section-title">Why Veyra TV?</h2>
-        <div class="grid">
-            <div class="card">
-                <h3>🚀 High Performance</h3>
-                <p>Built on top of Media3 (ExoPlayer) for buffer-free streaming and instant playback across all your favorite streams.</p>
+        <div class="section-header fade-in-up">
+            <h2>Engineered for Excellence</h2>
+            <p style="color: #a1a1aa;">We stripped away the bloat to give you the purest streaming experience possible.</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card fade-in-up">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <h3>Blazing Fast</h3>
+                <p>Powered by ExoPlayer Media3. Instant start times and adaptive buffering keep you watching, not waiting.</p>
             </div>
-            <div class="card">
-                <h3>🔒 Privacy First</h3>
-                <p>No tracking, no analytics, and no accounts. Your playlists stay on your device and are never sent to our servers.</p>
+
+            <div class="feature-card fade-in-up" style="transition-delay: 0.1s;">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h3>Zero Tracking</h3>
+                <p>Your data stays yours. No analytics, no remote logging, and no account required. Pure local privacy.</p>
             </div>
-            <div class="card">
-                <h3>🎨 Material Design</h3>
-                <p>A beautiful, dark-mode first UI designed with Jetpack Compose that looks great on both Mobile and Android TV.</p>
+
+            <div class="feature-card fade-in-up" style="transition-delay: 0.2s;">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                </div>
+                <h3>TV Optimized</h3>
+                <p>Designed for the big screen. Full D-Pad navigation support and a layout built for 10-foot interfaces.</p>
             </div>
-            <div class="card">
-                <h3>📺 TV Optimized</h3>
-                <p>Navigate comfortably from your couch. Full D-Pad support and a layout designed specifically for large screens.</p>
+
+            <div class="feature-card fade-in-up">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </div>
+                <h3>Modern UI</h3>
+                <p>Built with Jetpack Compose and Material Design 3. Dark mode native for a cinema-like feel.</p>
             </div>
-            <div class="card">
-                <h3>📂 Smart Management</h3>
-                <p>Organize your channels automatically. We parse your M3U playlists efficiently to group content by categories.</p>
+
+            <div class="feature-card fade-in-up" style="transition-delay: 0.1s;">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                </div>
+                <h3>Smart Grouping</h3>
+                <p>Automatically parses your M3U playlists and organizes channels by category for easy browsing.</p>
             </div>
-            <div class="card">
-                <h3>🔓 Open Source</h3>
-                <p>Auditable code and community-driven development. Trust what you install on your device.</p>
+
+            <div class="feature-card fade-in-up" style="transition-delay: 0.2s;">
+                <div class="feature-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </div>
+                <h3>Fully Open</h3>
+                <p>100% open source. Audit the code, build it yourself, or contribute to the community.</p>
             </div>
         </div>
     </section>
 
     <footer>
-        <div class="footer-content">
-            <div class="footer-col">
-                <h4>Veyra TV</h4>
-                <p style="color: #888; max-width: 250px;">The open standard for IPTV playback on Android.</p>
+        <div class="footer-top">
+            <div class="footer-brand">
+                <h3 class="logo">Veyra TV</h3>
+                <p>The open standard for secure, high-performance IPTV streaming on Android.</p>
             </div>
-            <div class="footer-col">
+            
+            <div class="footer-links">
                 <h4>Product</h4>
                 <ul>
                     <li><a href="https://github.com/Shyam-vadgama/veyra-tv/releases">Download</a></li>
-                    <li><a href="https://github.com/Shyam-vadgama/veyra-tv/issues">Report Bug</a></li>
-                    <li><a href="https://github.com/Shyam-vadgama/veyra-tv/issues">Request Feature</a></li>
+                    <li><a href="https://github.com/Shyam-vadgama/veyra-tv/issues">Changelog</a></li>
                 </ul>
             </div>
-            <div class="footer-col">
+
+            <div class="footer-links">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="https://github.com/Shyam-vadgama/veyra-tv/issues">Report Issue</a></li>
+                    <li><a href="mailto:shyam.veyra.tv@gmail.com">Contact</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
                 <h4>Legal</h4>
                 <ul>
-                    <li><a href="privacy.html">Privacy Policy</a></li>
-                    <li><a href="terms.html">Terms of Use</a></li>
+                    <li><a href="privacy.html">Privacy</a></li>
+                    <li><a href="terms.html">Terms</a></li>
                     <li><a href="https://github.com/Shyam-vadgama/veyra-tv/blob/main/LICENSE">License</a></li>
                 </ul>
             </div>
-            <div class="footer-col">
-                <h4>Connect</h4>
-                <ul>
-                    <li><a href="https://github.com/Shyam-vadgama/veyra-tv">GitHub</a></li>
-                    <li><a href="mailto:shyam.veyra.tv@gmail.com">Support Email</a></li>
-                </ul>
-            </div>
         </div>
-        <div class="copyright">
-            &copy; 2025 Veyra Open Source Team. Licensed under MIT.
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 Veyra Open Source Team. Released under MIT License.</p>
         </div>
     </footer>
+
+    <script>
+        // Simple Intersection Observer for scroll animations
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const fadeElements = document.querySelectorAll('.fade-in-up');
+            fadeElements.forEach(el => observer.observe(el));
+        });
+    </script>
 </body>
 </html>
