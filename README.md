@@ -75,7 +75,7 @@ Veyra TV is built using modern Android development practices and libraries:
 ### Installation
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/veyra-tv/iptvplayer.git
+    git clone https://github.com/Shyam-vadgama/veyra-tv.git
     ```
 2.  **Open in Android Studio:**
     *   File -> Open -> Select the cloned directory.
@@ -97,8 +97,8 @@ We welcome contributions from the open-source community! Whether it's fixing bug
 5.  Submit a **Pull Request**.
 
 ### Reporting Issues
-*   Found a bug? [Report it here](https://github.com/veyra-tv/iptvplayer/issues/new?template=bug_report.yml)
-*   Have a feature idea? [Request it here](https://github.com/veyra-tv/iptvplayer/issues/new?template=feature_request.yml)
+*   Found a bug? [Report it here](https://github.com/Shyam-vadgama/veyra-tv/issues/new?template=bug_report.yml)
+*   Have a feature idea? [Request it here](https://github.com/Shyam-vadgama/veyra-tv/issues/new?template=feature_request.yml)
 
 ---
 
@@ -112,7 +112,7 @@ This project is open-source. Please check the [LICENSE](LICENSE) file for more d
 
 For support, questions, or just to say hi:
 
-*   **GitHub Issues:** [Project Issues](https://github.com/veyra-tv/iptvplayer/issues)
+*   **GitHub Issues:** [Project Issues](https://github.com/Shyam-vadgama/veyra-tv/issues)
 *   **Email:** support@yourdomain.com
 
 ---

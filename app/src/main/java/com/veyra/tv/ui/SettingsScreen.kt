@@ -163,7 +163,7 @@ fun SettingsScreen(
                     subtitle = "View source code on GitHub",
                     icon = Icons.Default.Code,
                     isTv = isTv,
-                    onClick = { openUrl(context, "https://github.com/veyra-tv/iptvplayer") }
+                    onClick = { openUrl(context, "https://github.com/Shyam-vadgama/veyra-tv") }
                 )
             }
             item {
@@ -184,7 +184,7 @@ fun SettingsScreen(
                     subtitle = "Help us improve Veyra TV",
                     icon = Icons.Default.BugReport,
                     isTv = isTv,
-                    onClick = { openUrl(context, "https://github.com/veyra-tv/iptvplayer/issues/new?template=bug_report.yml") }
+                    onClick = { openUrl(context, "https://github.com/Shyam-vadgama/veyra-tv/issues/new?template=bug_report.yml") }
                 )
             }
             item {
@@ -193,7 +193,7 @@ fun SettingsScreen(
                     subtitle = "Suggest a new idea",
                     icon = Icons.Default.Add,
                     isTv = isTv,
-                    onClick = { openUrl(context, "https://github.com/veyra-tv/iptvplayer/issues/new?template=feature_request.yml") }
+                    onClick = { openUrl(context, "https://github.com/Shyam-vadgama/veyra-tv/issues/new?template=feature_request.yml") }
                 )
             }
             item {
