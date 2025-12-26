@@ -4,12 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Use - Veyra TV</title>
-    <link rel="stylesheet" href="./css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        :root {
+            --bg-main: #030014;
+            --bg-card: rgba(20, 20, 35, 0.4);
+            --bg-card-hover: rgba(30, 30, 50, 0.6);
+            --primary: #7000FF;
+            --primary-gradient: linear-gradient(135deg, #7000FF 0%, #A259FF 100%);
+            --accent: #00C6FF;
+            --text-white: #FFFFFF;
+            --text-gray: #9CA3AF;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-glow: rgba(112, 0, 255, 0.5);
+            --glass-blur: blur(20px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+        body { background-color: var(--bg-main); color: var(--text-white); overflow-x: hidden; line-height: 1.5; }
+
+        .mesh-background {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            background: radial-gradient(circle at 15% 50%, rgba(112, 0, 255, 0.15), transparent 40%), radial-gradient(circle at 85% 30%, rgba(0, 198, 255, 0.1), transparent 40%);
+            pointer-events: none;
+        }
+
+        nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 1200px; padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 20, 0.7); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color); border-radius: 100px; z-index: 1000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px; background: linear-gradient(to right, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .nav-links a { color: var(--text-gray); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--text-white); }
+
+        .content-page { max-width: 800px; margin: 0 auto; padding: 140px 20px 80px; }
+        .content-page h1 { font-size: 3rem; margin-bottom: 10px; color: #fff; font-weight: 800; letter-spacing: -1px; }
+        .last-updated { color: var(--text-gray); display: block; margin-bottom: 40px; font-size: 0.9rem; }
+        .content-page h2 { font-size: 1.5rem; margin: 40px 0 20px; color: #fff; font-weight: 700; }
+        .content-page p { margin-bottom: 16px; color: var(--text-gray); font-size: 1.05rem; line-height: 1.7; }
+        .content-page ul { padding-left: 20px; color: var(--text-gray); margin-bottom: 20px; }
+        .content-page li { margin-bottom: 10px; }
+        .content-page a { color: var(--accent); text-decoration: none; }
+        .content-page a:hover { text-decoration: underline; }
+
+        footer { border-top: 1px solid var(--border-color); padding: 80px 20px 40px; background: #010101; text-align: center; }
+        .copyright { color: #444; font-size: 0.85rem; }
+        @media (max-width: 768px) { .nav-links { display: none; } }
+    </style>
 </head>
 <body>
+
+    <div class="mesh-background"></div>
+
     <nav>
-        <div class="logo"><a href="index.html" style="color: #fff;">Veyra TV</a></div>
+        <a href="index.html" class="logo">Veyra TV</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="privacy.html">Privacy</a>
