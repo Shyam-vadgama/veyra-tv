@@ -9,52 +9,78 @@
 
         :root {
             --bg-main: #030014;
-            --bg-card: rgba(20, 20, 35, 0.4);
-            --bg-card-hover: rgba(30, 30, 50, 0.6);
             --primary: #7000FF;
-            --primary-gradient: linear-gradient(135deg, #7000FF 0%, #A259FF 100%);
-            --accent: #00C6FF;
             --text-white: #FFFFFF;
             --text-gray: #9CA3AF;
             --border-color: rgba(255, 255, 255, 0.1);
-            --border-glow: rgba(112, 0, 255, 0.5);
+            --glass-bg: rgba(20, 20, 35, 0.6);
             --glass-blur: blur(20px);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
 
-        body { background-color: var(--bg-main); color: var(--text-white); overflow-x: hidden; line-height: 1.5; }
+        body { background-color: var(--bg-main); color: var(--text-white); line-height: 1.6; overflow-x: hidden; }
 
         .mesh-background {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background: radial-gradient(circle at 15% 50%, rgba(112, 0, 255, 0.15), transparent 40%), radial-gradient(circle at 85% 30%, rgba(0, 198, 255, 0.1), transparent 40%);
-            pointer-events: none;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(112, 0, 255, 0.15), transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 198, 255, 0.1), transparent 40%);
         }
 
+        /* Nav */
         nav {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 1200px; padding: 12px 24px;
-            display: flex; justify-content: space-between; align-items: center; background: rgba(10, 10, 20, 0.7); backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--border-color); border-radius: 100px; z-index: 1000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 1200px;
+            padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(10, 10, 20, 0.7); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color); border-radius: 100px; z-index: 1000;
         }
-
-        .logo { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px; background: linear-gradient(to right, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
-        .nav-links { display: flex; gap: 24px; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px; color: #fff; text-decoration: none; }
+        .nav-links { display: flex; gap: 24px; }
         .nav-links a { color: var(--text-gray); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.3s; }
         .nav-links a:hover { color: var(--text-white); }
 
-        .content-page { max-width: 800px; margin: 0 auto; padding: 140px 20px 80px; }
-        .content-page h1 { font-size: 3rem; margin-bottom: 10px; color: #fff; font-weight: 800; letter-spacing: -1px; }
-        .last-updated { color: var(--text-gray); display: block; margin-bottom: 40px; font-size: 0.9rem; }
-        .content-page h2 { font-size: 1.5rem; margin: 40px 0 20px; color: #fff; font-weight: 700; }
-        .content-page p { margin-bottom: 16px; color: var(--text-gray); font-size: 1.05rem; line-height: 1.7; }
-        .content-page ul { padding-left: 20px; color: var(--text-gray); margin-bottom: 20px; }
-        .content-page li { margin-bottom: 10px; }
-        .content-page a { color: var(--accent); text-decoration: none; }
-        .content-page a:hover { text-decoration: underline; }
+        /* Main Layout */
+        .container { max-width: 900px; margin: 0 auto; padding: 140px 20px 80px; position: relative; }
 
-        footer { border-top: 1px solid var(--border-color); padding: 80px 20px 40px; background: #010101; text-align: center; }
-        .copyright { color: #444; font-size: 0.85rem; }
-        @media (max-width: 768px) { .nav-links { display: none; } }
+        /* Header Section */
+        .page-header { text-align: center; margin-bottom: 60px; }
+        .page-header h1 { 
+            font-size: 3.5rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -1.5px;
+            background: linear-gradient(180deg, #fff 0%, #aaa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .last-updated { 
+            display: inline-block; padding: 6px 16px; border-radius: 50px; 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-color);
+            color: var(--text-gray); font-size: 0.85rem; 
+        }
+
+        /* Glass Card Content */
+        .glass-card {
+            background: var(--glass-bg); backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color); border-radius: 24px; padding: 60px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .section { margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 40px; }
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        h2 { font-size: 1.5rem; color: #fff; margin-bottom: 16px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+        h2::before { content: ''; width: 4px; height: 24px; background: var(--primary); border-radius: 2px; display: block; }
+        
+        p { color: var(--text-gray); margin-bottom: 16px; font-size: 1.05rem; }
+        ul { padding-left: 20px; color: var(--text-gray); margin-bottom: 16px; }
+        li { margin-bottom: 10px; }
+        a { color: #fff; text-decoration: underline; text-decoration-color: var(--primary); text-underline-offset: 4px; }
+        a:hover { color: var(--primary); }
+
+        footer { text-align: center; padding: 40px; color: #444; font-size: 0.9rem; border-top: 1px solid var(--border-color); background: #010101; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 2.5rem; }
+            .glass-card { padding: 30px; }
+            .nav-links { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -62,47 +88,64 @@
     <div class="mesh-background"></div>
 
     <nav>
-        <a href="index.html" class="logo">Veyra TV</a>
+        <a href="index.html" class="logo">Veyra.</a>
         <div class="nav-links">
             <a href="index.html">Home</a>
             <a href="privacy.html">Privacy</a>
         </div>
     </nav>
 
-    <div class="content-page">
-        <h1>Terms of Use</h1>
-        <span class="last-updated">Last Updated: December 26, 2025</span>
+    <div class="container">
+        <div class="page-header">
+            <h1>Terms of Use</h1>
+            <span class="last-updated">Last Updated: December 26, 2025</span>
+        </div>
 
-        <p>By downloading or using the Veyra TV application, you agree to the following terms and conditions.</p>
+        <div class="glass-card">
+            <div class="section">
+                <p>By downloading or using the Veyra TV application, you agree to the following terms and conditions.</p>
+            </div>
 
-        <h2>1. License</h2>
-        <p>Veyra TV is open-source software licensed under the MIT License. You are free to use, modify, and distribute the software in accordance with the terms of the license.</p>
+            <div class="section">
+                <h2>1. License</h2>
+                <p>Veyra TV is open-source software licensed under the MIT License. You are free to use, modify, and distribute the software in accordance with the terms of the license.</p>
+            </div>
 
-        <h2>2. Content Disclaimer</h2>
-        <p><strong>Veyra TV is a media player only.</strong> It does not contain any pre-loaded channels, movies, or streams. You acknowledge that:</p>
-        <ul>
-            <li>You are solely responsible for obtaining and providing your own content (M3U playlists).</li>
-            <li>We do not endorse or support the streaming of copyright-protected material without permission.</li>
-            <li>We have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party streams or services you access through the app.</li>
-        </ul>
+            <div class="section">
+                <h2>2. Content Disclaimer</h2>
+                <p><strong>Veyra TV is a media player only.</strong> It does not contain any pre-loaded channels, movies, or streams. You acknowledge that:</p>
+                <ul>
+                    <li>You are solely responsible for obtaining and providing your own content (M3U playlists).</li>
+                    <li>We do not endorse or support the streaming of copyright-protected material without permission.</li>
+                    <li>We have no control over, and assume no responsibility for, the content, privacy policies, or practices of any third-party streams or services you access through the app.</li>
+                </ul>
+            </div>
 
-        <h2>3. Prohibited Use</h2>
-        <p>You agree not to use Veyra TV for any unlawful purpose or in any way that violates the rights of others, including but not limited to accessing pirated content.</p>
+            <div class="section">
+                <h2>3. Prohibited Use</h2>
+                <p>You agree not to use Veyra TV for any unlawful purpose or in any way that violates the rights of others, including but not limited to accessing pirated content.</p>
+            </div>
 
-        <h2>4. No Warranty</h2>
-        <p>The application is provided "AS IS", without warranty of any kind, express or implied. We do not guarantee that the app will be error-free or that it will work with all stream types.</p>
+            <div class="section">
+                <h2>4. No Warranty</h2>
+                <p>The application is provided "AS IS", without warranty of any kind, express or implied. We do not guarantee that the app will be error-free or that it will work with all stream types.</p>
+            </div>
 
-        <h2>5. Limitation of Liability</h2>
-        <p>In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from the use of this software.</p>
+            <div class="section">
+                <h2>5. Limitation of Liability</h2>
+                <p>In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from the use of this software.</p>
+            </div>
 
-        <h2>6. Contact</h2>
-        <p>For any questions regarding these Terms, please contact us at <a href="mailto:shyam.veyra.tv@gmail.com">shyam.veyra.tv@gmail.com</a>.</p>
+            <div class="section">
+                <h2>6. Contact</h2>
+                <p>For any questions regarding these Terms, please contact us at <a href="mailto:shyam.veyra.tv@gmail.com">shyam.veyra.tv@gmail.com</a>.</p>
+            </div>
+        </div>
     </div>
 
     <footer>
-        <div class="copyright">
-            &copy; 2025 Veyra Open Source Team.
-        </div>
+        &copy; 2025 Veyra Open Source Team.
     </footer>
+
 </body>
 </html>
