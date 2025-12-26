@@ -59,7 +59,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil.compose.SubcomposeAsyncImage
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.veyra.tv.model.Channel
 import com.veyra.tv.ui.VideoPlayer
@@ -507,10 +507,11 @@ fun RecentChannelItem(channel: Channel, onClick: () -> Unit, isTv: Boolean) {
                 .size(100.dp)
                 .padding(4.dp)
         ) {
-            SubcomposeAsyncImage(
+            AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(channel.logoUrl)
                     .crossfade(true)
+                    .size(300, 300) // Explicit low res for thumbnails
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
@@ -759,14 +760,25 @@ fun SearchBar(
     isTv: Boolean,
     modifier: Modifier = Modifier
 ) {
+    // Local state to hold the immediate text input
+    var textState by remember(query) { mutableStateOf(query) }
+    
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val scale by animateFloatAsState(targetValue = if (isTv && isFocused) 1.02f else 1f, label = "SearchScale")
     
+    // Debounce the update to the parent
+    LaunchedEffect(textState) {
+        if (textState != query) {
+            kotlinx.coroutines.delay(300) // Debounce 300ms
+            onQueryChange(textState)
+        }
+    }
+
     Box(modifier = modifier) {
         OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
+            value = textState,
+            onValueChange = { textState = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .scale(scale)
@@ -774,8 +786,8 @@ fun SearchBar(
             placeholder = { Text("Search channels...", color = Color.Gray) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.Gray) },
             trailingIcon = {
-                if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
+                if (textState.isNotEmpty()) {
+                    IconButton(onClick = { textState = ""; onQueryChange("") }) {
                         Icon(Icons.Default.Close, contentDescription = "Clear", tint = Color.Gray)
                     }
                 }
@@ -783,12 +795,13 @@ fun SearchBar(
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = {
+                 onQueryChange(textState) // Immediate update on enter
                  focusManager.moveFocus(FocusDirection.Down)
             }),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFF2B2B2B),
                 unfocusedContainerColor = Color(0xFF2B2B2B),
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                focusedBorderColor = if (isTv) Color.White else MaterialTheme.colorScheme.primary, // High contrast for TV
                 unfocusedBorderColor = Color.Transparent,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedTextColor = Color.White,
@@ -887,7 +900,8 @@ fun ChannelGridItem(
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(targetValue = if (isTv && isFocused) 1.1f else 1.0f, label = "CardScale")
-    val border = if (isTv && isFocused) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else BorderStroke(1.dp, Color(0xFF2B2B2B))
+    // Use White for TV focus to ensure visibility against dark backgrounds
+    val border = if (isTv && isFocused) BorderStroke(3.dp, Color.White) else BorderStroke(1.dp, Color(0xFF2B2B2B))
 
     Card(
         modifier = Modifier
@@ -904,11 +918,12 @@ fun ChannelGridItem(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Logo centered
-            SubcomposeAsyncImage(
+            AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(channel.logoUrl)
                     .crossfade(true)
                     .diskCacheKey(channel.logoUrl)
+                    .size(400, 225) // Approx 16:9 thumbnail size
                     .error(android.R.drawable.ic_menu_report_image)
                     .build(),
                 contentDescription = channel.name,
@@ -916,10 +931,7 @@ fun ChannelGridItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(24.dp) // Generous padding for logos
-                    .alpha(0.8f), // Subtle transparency
-                loading = {
-                     Box(Modifier.matchParentSize().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)))
-                }
+                    .alpha(0.8f)
             )
 
             // Gradient Overlay for Text
@@ -1011,17 +1023,18 @@ fun HeroSection(channel: Channel, onClick: () -> Unit, isTv: Boolean) {
             .padding(bottom = 16.dp)
             .scale(scale)
             .clip(RoundedCornerShape(16.dp))
-            .border(2.dp, if (isTv && isFocused) MaterialTheme.colorScheme.primary else Color.Transparent, RoundedCornerShape(16.dp))
+            .border(3.dp, if (isTv && isFocused) Color.White else Color.Transparent, RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
             .clickable(onClick = onClick)
     ) {
         // Background Image (Blurred or dim)
-        SubcomposeAsyncImage(
+        AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(channel.logoUrl)
                 .crossfade(true)
+                .size(800, 450) // Higher res for hero but still bounded
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,

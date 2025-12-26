@@ -22,7 +22,7 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.Iptvplayer"
-        android:banner="@drawable/icon"> 
+        android:banner="@drawable/tv_banner"> 
         
         <activity
             android:name="com.veyra.tv.MainActivity"

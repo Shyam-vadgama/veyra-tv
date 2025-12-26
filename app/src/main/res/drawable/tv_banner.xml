@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background Gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#FF000000"
+                android:endColor="#FF333333"
+                android:angle="45"
+                android:type="linear" />
+            <size android:width="320dp" android:height="180dp"/>
+        </shape>
+    </item>
+    
+    <!-- Centered Icon (simulating the logo) -->
+    <item android:gravity="center" android:width="64dp" android:height="64dp">
+         <vector android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+            <path android:fillColor="#00000000" android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,25.6c0,0 -17.3,-1.6 -42.5,19.8c-18,15.2 -3.4,45.1 -3.4,45.1l-24,-17z" android:strokeWidth="1" android:strokeColor="#00000000"/>
+            <group>
+                <path android:fillColor="#FFBB86FC" android:pathData="M53.98,38.35l-9.96,28.85l9.96,-4.98l9.96,4.98z"/>
+                <path android:fillColor="#FF3700B3" android:pathData="M53.98,15.35l-20.96,60.85l20.96,-10.98l20.96,10.98z"/>
+            </group>
+        </vector>
+    </item>
+</layer-list>

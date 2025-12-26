@@ -1,0 +1,71 @@
+name: 🐞 Bug Report
+description: Report a bug or issue in Veyra TV
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - Shyam-vadgama
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug in **Veyra TV** 🙏  
+        Please fill out the details below to help us fix it faster.
+
+  - type: input
+    id: app_version
+    attributes:
+      label: App Version
+      description: Which version of Veyra TV are you using?
+      placeholder: "e.g. v1.3.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: Device Type
+      description: Where are you using the app?
+      options:
+        - Android Mobile
+        - Android TV
+    validations:
+      required: true
+
+  - type: input
+    id: android_version
+    attributes:
+      label: Android Version
+      description: Android OS version
+      placeholder: "e.g. Android 11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: Bug Description
+      description: Clearly describe the issue you are facing.
+      placeholder: "What happened? What did you expect?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the bug
+      placeholder: |
+        1. Open app
+        2. Go to Home
+        3. Search for a channel
+        4. App crashes
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Screenshots (Optional)
+      description: Attach screenshots or logcat output if available.
+      placeholder: "Paste logs or attach images"

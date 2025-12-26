@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📧 Contact Support
+    url: mailto:support@yourdomain.com
+    about: For private issues or questions, contact support via email.

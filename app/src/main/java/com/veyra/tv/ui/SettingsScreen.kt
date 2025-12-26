@@ -180,11 +180,20 @@ fun SettingsScreen(
             item { SettingsHeader("Support & Feedback") }
             item {
                 SettingsRow(
-                    title = "Report a Bug / Request Feature",
-                    subtitle = "Open a GitHub Issue",
+                    title = "Report a Bug",
+                    subtitle = "Help us improve Veyra TV",
                     icon = Icons.Default.BugReport,
                     isTv = isTv,
-                    onClick = { openUrl(context, "https://github.com/veyra-tv/iptvplayer/issues") }
+                    onClick = { openUrl(context, "https://github.com/veyra-tv/iptvplayer/issues/new?template=bug_report.yml") }
+                )
+            }
+            item {
+                SettingsRow(
+                    title = "Request a Feature",
+                    subtitle = "Suggest a new idea",
+                    icon = Icons.Default.Add,
+                    isTv = isTv,
+                    onClick = { openUrl(context, "https://github.com/veyra-tv/iptvplayer/issues/new?template=feature_request.yml") }
                 )
             }
             item {
@@ -193,7 +202,7 @@ fun SettingsScreen(
                     subtitle = "Send us an email",
                     icon = Icons.Default.Email,
                     isTv = isTv,
-                    onClick = { sendEmail(context, "support@veyra.tv", "Veyra TV Support Request") }
+                    onClick = { sendEmail(context, "support@yourdomain.com", "Veyra TV Support Request") }
                 )
             }
 

@@ -1,0 +1,47 @@
+name: ✨ Feature Request
+description: Suggest a new feature or improvement for Veyra TV
+title: "[Feature]: "
+labels: ["enhancement"]
+assignees:
+  - Shyam-vadgama
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got an idea to improve **Veyra TV**?  
+        We’d love to hear it 🚀
+
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: Feature Description
+      description: Describe the feature you want.
+      placeholder: "What feature do you want to add?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem it Solves
+      description: What problem does this feature solve?
+      placeholder: "Why is this feature needed?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution (Optional)
+      description: How do you think this feature should work?
+      placeholder: "Your idea on implementation"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Nice to have
+        - Important
+        - Critical

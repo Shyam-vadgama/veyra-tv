@@ -182,12 +182,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             for (playlist in targets) {
+                // Yield to ensure UI thread gets priority if this is sharing a pool (though it's IO)
+                kotlinx.coroutines.yield()
+                
                 // Check if already populated
                 val count = database.channelDao().getChannelCountForPlaylist(playlist.id)
                 if (count == 0) {
                      try {
                         // Sync quietly (don't update UI state)
                         repository.streamAndSaveChannels(playlist)
+                        // Add a delay between heavy parsing jobs to let the device cool down/catch up
+                        kotlinx.coroutines.delay(2000)
                      } catch (e: Exception) {
                          e.printStackTrace()
                      }
