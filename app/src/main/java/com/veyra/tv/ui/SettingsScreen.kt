@@ -202,7 +202,7 @@ fun SettingsScreen(
                     subtitle = "Send us an email",
                     icon = Icons.Default.Email,
                     isTv = isTv,
-                    onClick = { sendEmail(context, "support@yourdomain.com", "Veyra TV Support Request") }
+                    onClick = { sendEmail(context, "shyam.veyra.tv@gmail.com", "Veyra TV Support Request") }
                 )
             }
 

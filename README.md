@@ -113,7 +113,7 @@ This project is open-source. Please check the [LICENSE](LICENSE) file for more d
 For support, questions, or just to say hi:
 
 *   **GitHub Issues:** [Project Issues](https://github.com/Shyam-vadgama/veyra-tv/issues)
-*   **Email:** support@yourdomain.com
+*   **Email:** shyam.veyra.tv@gmail.com
 
 ---
 
