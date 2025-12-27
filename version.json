@@ -1,0 +1,6 @@
+{
+  "versionCode": 3,
+  "versionName": "1.2.0",
+  "apkUrl": "https://raw.githubusercontent.com/Shyam-vadgama/veyra-tv/main/app-release.apk",
+  "changelog": "- Remove unwanted playlists, keep only IPTV-ORG\n- feat(tv): enhance focus UX with Netflix-style visuals and fix focus loss bugs\n- Redesign privacy and terms pages with modern UI\n- Inline CSS to fix GitHub Pages loading issues"
+}

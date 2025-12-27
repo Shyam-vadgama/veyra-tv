@@ -65,6 +65,9 @@ import coil.request.ImageRequest
 import com.veyra.tv.model.Channel
 import com.veyra.tv.ui.VideoPlayer
 import com.veyra.tv.ui.SettingsScreen
+import com.veyra.tv.data.updater.UpdateInfo
+import com.veyra.tv.data.updater.UpdateManager
+import com.veyra.tv.ui.components.UpdateDialog
 import com.veyra.tv.ui.theme.BackgroundEnd
 import com.veyra.tv.ui.theme.BackgroundStart
 import com.veyra.tv.ui.theme.IptvplayerTheme
@@ -149,6 +152,25 @@ fun HomeScreen(
     val context = LocalContext.current
     val isTv = isTV(context)
     
+    // Update Manager Integration
+    val updateManager = remember { UpdateManager(context) }
+    var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+    
+    LaunchedEffect(Unit) {
+        val info = updateManager.checkForUpdate()
+        if (info != null) {
+            updateInfo = info
+        }
+    }
+
+    if (updateInfo != null) {
+        UpdateDialog(
+            updateInfo = updateInfo!!,
+            updateManager = updateManager,
+            onDismiss = { updateInfo = null }
+        )
+    }
+
     val pagedChannels = viewModel.pagedChannels.collectAsLazyPagingItems()
     val categoriesList by viewModel.categories.collectAsStateWithLifecycle(initialValue = emptyList())
     val availableCountriesList by viewModel.availableCountries.collectAsStateWithLifecycle(initialValue = emptyList())
