@@ -15,3 +15,7 @@
 local.properties
 *.log
 .kotlin/
+
+# Local-only agent notes and design/plan docs (not published to GitHub)
+/AGENTS.md
+/docs/superpowers/
