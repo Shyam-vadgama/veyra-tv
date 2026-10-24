@@ -19,3 +19,8 @@ local.properties
 # Local-only agent notes and design/plan docs (not published to GitHub)
 /AGENTS.md
 /docs/superpowers/
+
+# Signing material must never be committed
+keystore.properties
+*.jks
+*.keystore

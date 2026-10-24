@@ -1,9 +1,29 @@
+import java.io.File
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
 }
+
+// Signing material lives outside the repository. Local builds pick up
+// ~/.veyra-keys/keystore.properties; CI supplies the same keys via env vars.
+val keystorePropsFile = sequenceOf(
+    System.getenv("VEYRA_KEYSTORE_PROPERTIES")?.let { file(it) },
+    File(System.getProperty("user.home"), ".veyra-keys/keystore.properties"),
+    rootProject.file("keystore.properties")
+).filterNotNull().firstOrNull { it.isFile }
+
+val keystoreProps = Properties().apply {
+    keystorePropsFile?.inputStream()?.use { load(it) }
+}
+
+val releaseStoreFile = keystoreProps.getProperty("storeFile") ?: System.getenv("KEYSTORE_FILE")
+val releaseStorePassword = keystoreProps.getProperty("storePassword") ?: System.getenv("KEYSTORE_PASSWORD")
+val releaseKeyAlias = keystoreProps.getProperty("keyAlias") ?: System.getenv("KEY_ALIAS")
+val releaseKeyPassword = keystoreProps.getProperty("keyPassword") ?: System.getenv("KEY_PASSWORD")
 
 android {
     namespace = "com.veyra.tv"
@@ -19,6 +39,19 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (releaseStoreFile != null && releaseStorePassword != null &&
+            releaseKeyAlias != null && releaseKeyPassword != null
+        ) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -27,6 +60,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Signed when a keystore is available; otherwise the artifact stays unsigned.
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 

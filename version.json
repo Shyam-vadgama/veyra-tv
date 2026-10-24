@@ -1,6 +1,6 @@
 {
   "versionCode": 10,
   "versionName": "2.0.0",
-  "apkUrl": "https://raw.githubusercontent.com/Shyam-vadgama/veyra-tv/main/app-release.apk",
-  "changelog": "- Add your own playlists: M3U/M3U8 URLs and Xtream Codes logins\n- Add, edit, delete and switch playlists from the TV-friendly Playlists screen\n- Bundled public playlists now seed only once, so deleted sources stay deleted\n- Room database migration keeps existing playlists and favorites\n- Build fixes: Windows JDK pin removed, gradlew is executable, Android CI added"
+  "apkUrl": "https://github.com/Shyam-vadgama/veyra-tv/releases/download/v2.0.0/Veyra-TV-2.0.0.apk",
+  "changelog": "IMPORTANT: v2.0.0 uses a new signing key. To update from v1.1.0: download this APK from github.com/Shyam-vadgama/veyra-tv/releases/latest in a browser, uninstall Veyra TV, then install the downloaded APK. Saved playlist sources must be re-added once.\n\n- Add, edit, delete and switch M3U/M3U8 and Xtream Codes playlists\n- TV-friendly Playlists screen with D-pad controls\n- Bundled playlists now seed only once, so deleted sources stay deleted\n- Clear sync errors on Home and Playlists; HTTP sources are supported\n- Room 5->6 migration for future in-place updates\n- Signed release builds and Android CI"
 }
