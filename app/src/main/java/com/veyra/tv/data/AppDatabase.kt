@@ -4,10 +4,14 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.veyra.tv.model.Channel
 import com.veyra.tv.model.Playlist
 
-@Database(entities = [Channel::class, Playlist::class], version = 5, exportSchema = false)
+@Database(entities = [Channel::class, Playlist::class], version = 6, exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun channelDao(): ChannelDao
     abstract fun playlistDao(): PlaylistDao
@@ -15,6 +19,22 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE playlists ADD COLUMN kind TEXT NOT NULL DEFAULT 'M3U'")
+                db.execSQL("ALTER TABLE playlists ADD COLUMN serverUrl TEXT")
+                db.execSQL("ALTER TABLE playlists ADD COLUMN username TEXT")
+                db.execSQL("ALTER TABLE playlists ADD COLUMN password TEXT")
+                db.execSQL("ALTER TABLE playlists ADD COLUMN epgUrl TEXT")
+
+                // Collapse any duplicate URLs created before the unique index existed.
+                db.execSQL("DELETE FROM playlists WHERE id NOT IN (SELECT MIN(id) FROM playlists GROUP BY url)")
+                // Foreign keys are enabled after onUpgrade, so remove orphans explicitly.
+                db.execSQL("DELETE FROM channels WHERE playlistId NOT IN (SELECT id FROM playlists)")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_playlists_url ON playlists(url)")
+            }
+        }
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -24,6 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "iptv_player_database"
                 )
                 .enableMultiInstanceInvalidation()
+                .addMigrations(MIGRATION_5_6)
                 .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance

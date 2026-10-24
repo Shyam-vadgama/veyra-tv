@@ -1,6 +1,6 @@
 {
-  "versionCode": 3,
-  "versionName": "1.2.0",
+  "versionCode": 10,
+  "versionName": "2.0.0",
   "apkUrl": "https://raw.githubusercontent.com/Shyam-vadgama/veyra-tv/main/app-release.apk",
-  "changelog": "- Remove unwanted playlists, keep only IPTV-ORG\n- feat(tv): enhance focus UX with Netflix-style visuals and fix focus loss bugs\n- Redesign privacy and terms pages with modern UI\n- Inline CSS to fix GitHub Pages loading issues"
+  "changelog": "- Add your own playlists: M3U/M3U8 URLs and Xtream Codes logins\n- Add, edit, delete and switch playlists from the TV-friendly Playlists screen\n- Bundled public playlists now seed only once, so deleted sources stay deleted\n- Room database migration keeps existing playlists and favorites\n- Build fixes: Windows JDK pin removed, gradlew is executable, Android CI added"
 }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
+   Backup rules for API 23-30.
+
+   The database holds playlist URLs and Xtream credentials entered by the user,
+   so it is deliberately excluded from cloud backup and device transfer.
    See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="database" path="iptv_player_database" />
+    <exclude domain="database" path="iptv_player_database-wal" />
+    <exclude domain="database" path="iptv_player_database-shm" />
+    <exclude domain="sharedpref" path="iptv_prefs.xml" />
 </full-backup-content>

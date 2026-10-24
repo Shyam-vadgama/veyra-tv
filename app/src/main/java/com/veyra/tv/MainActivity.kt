@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,6 +66,7 @@ import coil.request.ImageRequest
 import com.veyra.tv.model.Channel
 import com.veyra.tv.ui.VideoPlayer
 import com.veyra.tv.ui.SettingsScreen
+import com.veyra.tv.ui.PlaylistManagerScreen
 import com.veyra.tv.data.updater.UpdateInfo
 import com.veyra.tv.data.updater.UpdateManager
 import com.veyra.tv.ui.components.UpdateDialog
@@ -117,6 +119,9 @@ fun AppNavigation(viewModel: MainViewModel) {
                     },
                     onSettingsClick = {
                         navController.navigate("settings")
+                    },
+                    onPlaylistsClick = {
+                        navController.navigate("playlists")
                     }
                 )
             }
@@ -138,6 +143,12 @@ fun AppNavigation(viewModel: MainViewModel) {
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable("playlists") {
+                PlaylistManagerScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
@@ -147,7 +158,8 @@ fun AppNavigation(viewModel: MainViewModel) {
 fun HomeScreen(
     viewModel: MainViewModel,
     onChannelClick: (Channel) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onPlaylistsClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isTv = isTV(context)
@@ -179,6 +191,7 @@ fun HomeScreen(
     val selectedCategoryText by viewModel.selectedCategory.collectAsStateWithLifecycle()
     val selectedCountryCode by viewModel.selectedCountry.collectAsStateWithLifecycle()
     val isSyncingState by viewModel.isSyncing.collectAsStateWithLifecycle()
+    val playlistError by viewModel.playlistError.collectAsStateWithLifecycle()
     
     val gridFocusRequester = remember { FocusRequester() }
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -374,14 +387,25 @@ fun HomeScreen(
                     }
                 }
             } else if (pagedChannels.loadState.refresh is LoadState.NotLoading) {
-                EmptyState(
-                    category = selectedCategoryText,
-                    onClearFilters = {
-                        viewModel.onSearchQueryChanged("")
-                        viewModel.onCategorySelected(null)
-                        viewModel.setSelectedCountry(null)
-                    }
-                )
+                val errorText = playlistError
+                if (errorText != null && searchQueryText.isEmpty() && selectedCategoryText == null) {
+                    SyncErrorState(
+                        message = errorText,
+                        onRetry = {
+                            viewModel.selectedPlaylist.value?.let { viewModel.syncPlaylist(it) }
+                        },
+                        onManagePlaylists = onPlaylistsClick
+                    )
+                } else {
+                    EmptyState(
+                        category = selectedCategoryText,
+                        onClearFilters = {
+                            viewModel.onSearchQueryChanged("")
+                            viewModel.onCategorySelected(null)
+                            viewModel.setSelectedCountry(null)
+                        }
+                    )
+                }
             }
         }
     }
@@ -436,6 +460,21 @@ fun HomeScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
                 
+                var isPlaylistFocused by remember { mutableStateOf(false) }
+                ListItem(
+                    headlineContent = { Text("Manage Playlists", color = if (isPlaylistFocused) MaterialTheme.colorScheme.primary else Color.White) },
+                    leadingContent = { Icon(Icons.Default.PlaylistPlay, contentDescription = null, tint = if (isPlaylistFocused) MaterialTheme.colorScheme.primary else Color.White) },
+                    modifier = Modifier
+                        .clickable {
+                            showBottomSheet = false
+                            onPlaylistsClick()
+                        }
+                        .onFocusChanged { isPlaylistFocused = it.isFocused }
+                        .background(if (isPlaylistFocused) Color.White.copy(alpha = 0.1f) else Color.Transparent)
+                        .padding(horizontal = 8.dp),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+
                 var isItem3Focused by remember { mutableStateOf(false) }
                 ListItem(
                     headlineContent = { Text("App Settings", color = if (isItem3Focused) MaterialTheme.colorScheme.primary else Color.White) },
@@ -771,6 +810,44 @@ fun EmptyState(category: String?, onClearFilters: () -> Unit = {}) {
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
         ) {
             Text("Clear All Filters")
+        }
+    }
+}
+
+
+@Composable
+fun SyncErrorState(
+    message: String,
+    onRetry: () -> Unit,
+    onManagePlaylists: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = null,
+            tint = Color(0xFFFFB4B4),
+            modifier = Modifier.size(64.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Couldn't load your playlist",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = message,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(onClick = onRetry) { Text("Try again") }
+            OutlinedButton(onClick = onManagePlaylists) { Text("Manage playlists") }
         }
     }
 }

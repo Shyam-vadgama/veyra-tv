@@ -18,7 +18,7 @@ class JsonPlaylistParser {
         .readTimeout(60, TimeUnit.SECONDS)
         .build()
 
-    suspend fun parseStream(url: String, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit) = withContext(Dispatchers.IO) {
+    suspend fun parseStream(url: String, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit): Boolean = withContext(Dispatchers.IO) {
         try {
             Log.d("JsonPlaylistParser", "Starting download: $url")
             val request = Request.Builder()
@@ -27,26 +27,33 @@ class JsonPlaylistParser {
                 .build()
             
             val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                Log.e("JsonPlaylistParser", "Network error: ${response.code}")
-                return@withContext
-            }
+            try {
+                if (!response.isSuccessful) {
+                    Log.e("JsonPlaylistParser", "Network error: ${response.code}")
+                    return@withContext false
+                }
 
-            val body = response.body
-            if (body == null) {
-                Log.e("JsonPlaylistParser", "Empty body")
-                return@withContext
+                val body = response.body
+                if (body == null) {
+                    Log.e("JsonPlaylistParser", "Empty body")
+                    return@withContext false
+                }
+                
+                parseJsonStream(body, playlistId, onChunkLoaded)
+            } finally {
+                response.close()
             }
             
-            parseJsonStream(body, playlistId, onChunkLoaded)
-            
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("JsonPlaylistParser", "Exception during download", e)
             e.printStackTrace()
+            false
         }
     }
 
-    private suspend fun parseJsonStream(body: ResponseBody, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit) {
+    private suspend fun parseJsonStream(body: ResponseBody, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit): Boolean {
         val inputStream = body.byteStream()
         val reader = JsonReader(InputStreamReader(inputStream, "UTF-8"))
         reader.isLenient = true
@@ -55,23 +62,28 @@ class JsonPlaylistParser {
         val chunkSize = 500
         var count = 0
         
-        try {
+        return try {
             reader.beginArray()
             while (reader.hasNext()) {
-                try {
-                    val channel = readChannel(reader, playlistId)
-                    if (channel != null) {
-                        chunk.add(channel)
-                        count++
-                    }
-
-                    if (chunk.size >= chunkSize) {
-                        onChunkLoaded(chunk.toList())
-                        chunk.clear()
-                    }
+                val channel = try {
+                    readChannel(reader, playlistId)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
                 } catch (e: Exception) {
-                    // Skip malformed item
+                    // Skip only the malformed item. Insert/cancellation failures
+                    // from onChunkLoaded must reach the outer handler.
                     Log.e("JsonPlaylistParser", "Error parsing item", e)
+                    null
+                }
+
+                if (channel != null) {
+                    chunk.add(channel)
+                    count++
+                }
+
+                if (chunk.size >= chunkSize) {
+                    onChunkLoaded(chunk.toList())
+                    chunk.clear()
                 }
             }
             reader.endArray()
@@ -80,9 +92,13 @@ class JsonPlaylistParser {
                 onChunkLoaded(chunk.toList())
             }
             Log.d("JsonPlaylistParser", "Parsed $count channels")
+            count > 0
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e("JsonPlaylistParser", "Error parsing stream", e)
             e.printStackTrace()
+            false
         } finally {
             try {
                 reader.close()

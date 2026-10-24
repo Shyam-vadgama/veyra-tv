@@ -2,6 +2,7 @@ package com.veyra.tv.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.database.sqlite.SQLiteConstraintException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -12,11 +13,15 @@ import com.veyra.tv.data.AppDatabase
 import com.veyra.tv.data.ChannelRepository
 import com.veyra.tv.data.DefaultPlaylists
 import com.veyra.tv.data.M3uParser
+import com.veyra.tv.data.XtreamCodes
 import com.veyra.tv.model.Channel
 import com.veyra.tv.model.Playlist
+import com.veyra.tv.model.PlaylistKind
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val database = AppDatabase.getDatabase(application)
@@ -31,6 +36,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _fallbackQueue = MutableStateFlow<List<Channel>>(emptyList())
     private val _userCountry = MutableStateFlow<String?>(null)
     private val _selectedCountry = MutableStateFlow<String?>(null)
+    private val _playlistError = MutableStateFlow<String?>(null)
 
     val searchQuery: StateFlow<String> = _searchQuery
     val selectedCategory: StateFlow<String?> = _selectedCategory
@@ -38,6 +44,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val playbackUrl: StateFlow<String?> = _playbackUrl
     val userCountry: StateFlow<String?> = _userCountry
     val selectedCountry: StateFlow<String?> = _selectedCountry
+    val playlistError: StateFlow<String?> = _playlistError
     
     val allPlaylists: StateFlow<List<Playlist>>
     val selectedPlaylist: StateFlow<Playlist?>
@@ -134,32 +141,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun setupDefaultPlaylists() {
         viewModelScope.launch {
-            // 1. Get existing playlists to avoid duplicates
-            val currentPlaylists = repository.allPlaylists.first()
-            val defaultPlaylists = DefaultPlaylists.getPlaylists()
-            
-            val newPlaylists = defaultPlaylists.filter { item ->
-                currentPlaylists.none { it.url == item.url }
-            }
-            
-            if (newPlaylists.isNotEmpty()) {
-                repository.setupDefaultPlaylists(newPlaylists)
+            // Seed the bundled public playlists exactly once. Re-seeding on every
+            // launch would resurrect playlists the user deliberately deleted.
+            if (!prefs.getBoolean("defaults_seeded", false)) {
+                prefs.edit().putBoolean("defaults_seeded", true).apply()
+
+                // Get existing playlists to avoid duplicates
+                val currentPlaylists = repository.allPlaylists.first()
+                val defaultPlaylists = DefaultPlaylists.getPlaylists()
+
+                val newPlaylists = defaultPlaylists.filter { item ->
+                    currentPlaylists.none { it.url == item.url }
+                }
+
+                if (newPlaylists.isNotEmpty()) {
+                    repository.setupDefaultPlaylists(newPlaylists)
+                }
             }
 
             val jsonUrl = "https://shyam-vadgama.github.io/iptv-json-parser/channels.json"
-            
+
             // Re-fetch to get the ID
             val allPlaylistsNow = repository.allPlaylists.first()
             val fastPlaylist = allPlaylistsNow.find { it.url == jsonUrl }
 
-            // 4. Select and Sync
+            // Select and Sync
             var currentSelected = repository.selectedPlaylist.first()
-            
+
             if (currentSelected == null && fastPlaylist != null) {
                 repository.selectPlaylist(fastPlaylist.id)
                 currentSelected = fastPlaylist
             }
-            
+
+            // If the user removed the defaults, still make sure whatever they added is usable.
+            if (currentSelected == null) {
+                val first = allPlaylistsNow.firstOrNull()
+                if (first != null) {
+                    repository.selectPlaylist(first.id)
+                    currentSelected = first
+                }
+            }
+
             if (currentSelected != null) {
                  // Check if channels need syncing for the active playlist
                 val count = database.channelDao().getChannelCountForPlaylist(currentSelected.id)
@@ -167,7 +189,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     syncPlaylist(currentSelected)
                 }
             }
-            
+
             // 5. Background Indexing for Search & Fallback
             startBackgroundIndexing()
         }
@@ -202,16 +224,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     fun syncPlaylist(playlist: Playlist) {
-        if (isSyncing.value) return
+        // A newer request always wins; the old job's finally block checks the
+        // identity of the current job before clearing the shared flag.
         parsingJob?.cancel()
+        _isSyncing.value = true
         parsingJob = viewModelScope.launch {
-            _isSyncing.value = true
+            val currentJob = coroutineContext[Job]
             try {
-                repository.streamAndSaveChannels(playlist)
+                val loaded = repository.streamAndSaveChannels(playlist)
+                if (loaded) {
+                    _playlistError.value = null
+                } else {
+                    _playlistError.value = "Couldn't load \"${playlist.name}\". Check the URL or your login details."
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 e.printStackTrace()
+                _playlistError.value = "Couldn't load \"${playlist.name}\". Check the URL or your login details."
             } finally {
-                _isSyncing.value = false
+                if (parsingJob === currentJob) {
+                    parsingJob = null
+                    _isSyncing.value = false
+                }
             }
         }
     }
@@ -223,6 +258,161 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 syncPlaylist(playlist)
             }
         }
+    }
+
+    /**
+     * Adds a new playlist (existing == null) or updates one, returning true only
+     * when it was saved. Suspend so the duplicate-URL check and insert are atomic
+     * with respect to the caller, which keeps the dialog open on validation errors.
+     */
+    suspend fun savePlaylist(
+        existing: Playlist?,
+        name: String,
+        kind: PlaylistKind,
+        m3uUrl: String,
+        server: String,
+        username: String,
+        password: String
+    ): Boolean {
+        val trimmedName = name.trim()
+        if (trimmedName.isEmpty()) {
+            _playlistError.value = "Enter a name for this playlist"
+            return false
+        }
+
+        val resolvedUrl: String
+        val resolvedServer: String?
+        val resolvedUser: String?
+        val resolvedPassword: String?
+        val resolvedEpg: String?
+
+        when (kind) {
+            PlaylistKind.XTREAM -> {
+                val normalized = XtreamCodes.normalizeServer(server)
+                if (normalized.isEmpty() || username.isBlank() || password.isBlank()) {
+                    _playlistError.value = "Enter the server, username and password"
+                    return false
+                }
+                resolvedServer = normalized
+                resolvedUser = username.trim()
+                resolvedPassword = password
+                resolvedUrl = XtreamCodes.buildPlaylistUrl(normalized, resolvedUser, resolvedPassword)
+                resolvedEpg = XtreamCodes.buildEpgUrl(normalized, resolvedUser, resolvedPassword)
+            }
+            PlaylistKind.M3U -> {
+                val url = m3uUrl.trim()
+                if (url.isEmpty()) {
+                    _playlistError.value = "Enter an M3U playlist URL"
+                    return false
+                }
+                resolvedServer = null
+                resolvedUser = null
+                resolvedPassword = null
+                resolvedUrl = url
+                resolvedEpg = null
+            }
+        }
+
+        val isChangedUrl = existing == null || existing.url != resolvedUrl
+        if (isChangedUrl && repository.urlExists(resolvedUrl)) {
+            _playlistError.value = "That playlist is already added"
+            return false
+        }
+
+        if (existing == null) {
+            val newId = try {
+                repository.addPlaylist(
+                    Playlist(
+                        name = trimmedName,
+                        url = resolvedUrl,
+                        kind = kind,
+                        serverUrl = resolvedServer,
+                        username = resolvedUser,
+                        password = resolvedPassword,
+                        epgUrl = resolvedEpg
+                    )
+                ).toInt()
+            } catch (e: SQLiteConstraintException) {
+                // The unique URL index caught a concurrent duplicate.
+                _playlistError.value = "That playlist is already added"
+                return false
+            }
+            if (repository.playlistCount() == 1) {
+                repository.selectPlaylist(newId)
+                syncPlaylist(
+                    Playlist(
+                        id = newId,
+                        name = trimmedName,
+                        url = resolvedUrl,
+                        isSelected = true,
+                        kind = kind,
+                        serverUrl = resolvedServer,
+                        username = resolvedUser,
+                        password = resolvedPassword,
+                        epgUrl = resolvedEpg
+                    )
+                )
+            }
+        } else {
+            val urlChanged = existing.url != resolvedUrl
+            val updated = existing.copy(
+                name = trimmedName,
+                url = resolvedUrl,
+                kind = kind,
+                serverUrl = resolvedServer,
+                username = resolvedUser,
+                password = resolvedPassword,
+                epgUrl = resolvedEpg
+            )
+            try {
+                repository.updatePlaylist(updated)
+            } catch (e: SQLiteConstraintException) {
+                _playlistError.value = "That playlist is already added"
+                return false
+            }
+
+            // Old channels belong to the old source; drop them so the next use
+            // fetches the new URL instead of silently playing stale streams.
+            if (urlChanged) {
+                val stillSelected = repository.selectedPlaylist.first()?.id == existing.id
+                if (stillSelected) {
+                    // Sync without pre-clearing: ChannelRepository snapshots
+                    // favorites before it clears, so an http->https mirror edit
+                    // keeps favorites on identical stream URLs.
+                    syncPlaylist(updated.copy(isSelected = true))
+                } else {
+                    database.channelDao().clearChannelsForPlaylist(existing.id)
+                }
+            }
+        }
+        return true
+    }
+
+    fun deletePlaylist(playlist: Playlist) {
+        viewModelScope.launch {
+            val wasSelected = repository.selectedPlaylist.first()?.id == playlist.id
+            if (wasSelected) {
+                // Stop any in-flight download for the playlist being removed.
+                parsingJob?.cancel()
+                parsingJob = null
+                _isSyncing.value = false
+            }
+            repository.deletePlaylist(playlist)
+
+            if (wasSelected) {
+                val next = repository.allPlaylists.first().firstOrNull()
+                if (next != null) {
+                    repository.selectPlaylist(next.id)
+                    if (database.channelDao().getChannelCountForPlaylist(next.id) == 0) {
+                        syncPlaylist(next)
+                    }
+                }
+            }
+        }
+    }
+
+    fun clearPlaylistError() {
+        _playlistError.value = null
     }
 
     fun onSearchQueryChanged(query: String) {

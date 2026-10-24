@@ -16,8 +16,9 @@ class M3uParser {
         .readTimeout(60, TimeUnit.SECONDS)
         .build()
 
-    // Stream the response body line-by-line instead of buffering everything into a String
-    suspend fun parseStream(url: String, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit) = withContext(Dispatchers.IO) {
+    // Stream the response body line-by-line instead of buffering everything into a String.
+    // Returns true only when the playlist was fetched and parsed; callers surface false as an error.
+    suspend fun parseStream(url: String, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit): Boolean = withContext(Dispatchers.IO) {
         try {
             val request = Request.Builder()
                 .url(url)
@@ -25,20 +26,34 @@ class M3uParser {
                 .build()
             
             val response = client.newCall(request).execute()
-            if (!response.isSuccessful) return@withContext
+            try {
+                if (!response.isSuccessful) return@withContext false
 
-            val body = response.body ?: return@withContext
+                val body = response.body ?: return@withContext false
+                
+                // A 200 response can still be an error page; treat "no channels"
+                // as a failed sync so the UI can tell the user instead of blanking.
+                var channelCount = 0
+                val countingSink: suspend (List<Channel>) -> Unit = { chunk ->
+                    channelCount += chunk.size
+                    onChunkLoaded(chunk)
+                }
+                parseInputStream(body, playlistId, countingSink)
+                channelCount > 0
+            } finally {
+                response.close()
+            }
             
-            // Process the stream
-            parseInputStream(body, playlistId, onChunkLoaded)
-            
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (e: Exception) {
             e.printStackTrace()
+            false
         }
     }
 
     // Parse directly from a string (for debug/internal playlists)
-    suspend fun parseString(content: String, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit) = withContext(Dispatchers.Default) {
+    suspend fun parseString(content: String, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit): Boolean = withContext(Dispatchers.Default) {
         val reader = content.reader()
         val buffered = BufferedReader(reader)
         
@@ -101,6 +116,7 @@ class M3uParser {
             onChunkLoaded(chunk.toList())
         }
         buffered.close()
+        true
     }
 
     private suspend fun parseInputStream(body: ResponseBody, playlistId: Int, onChunkLoaded: suspend (List<Channel>) -> Unit) {

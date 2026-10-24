@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
+   Backup rules for API 31+.
+
+   The database holds playlist URLs and Xtream credentials entered by the user,
+   so it is deliberately excluded from cloud backup and device transfer.
    See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="database" path="iptv_player_database" />
+        <exclude domain="database" path="iptv_player_database-wal" />
+        <exclude domain="database" path="iptv_player_database-shm" />
+        <exclude domain="sharedpref" path="iptv_prefs.xml" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="database" path="iptv_player_database" />
+        <exclude domain="database" path="iptv_player_database-wal" />
+        <exclude domain="database" path="iptv_player_database-shm" />
+        <exclude domain="sharedpref" path="iptv_prefs.xml" />
     </device-transfer>
-    -->
 </data-extraction-rules>

@@ -23,6 +23,7 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.Iptvplayer"
+        android:usesCleartextTraffic="true"
         android:banner="@drawable/tv_banner"> 
 
         <provider
