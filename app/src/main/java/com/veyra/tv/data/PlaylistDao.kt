@@ -10,7 +10,13 @@ interface PlaylistDao {
     fun getAllPlaylists(): Flow<List<Playlist>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPlaylist(playlist: Playlist)
+    suspend fun insertPlaylist(playlist: Playlist): Long
+
+    @Query("SELECT COUNT(*) FROM playlists")
+    suspend fun getPlaylistCount(): Int
+
+    @Query("SELECT COUNT(*) FROM playlists WHERE url = :url")
+    suspend fun countByUrl(url: String): Int
     
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertPlaylists(playlists: List<Playlist>)

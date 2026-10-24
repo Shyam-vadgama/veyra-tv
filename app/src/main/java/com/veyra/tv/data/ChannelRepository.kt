@@ -66,4 +66,14 @@ class ChannelRepository(
     suspend fun findAlternativeChannels(channelName: String, excludeStreamUrl: String): List<Channel> {
         return channelDao.findAlternativeChannels(channelName, excludeStreamUrl)
     }
+
+    suspend fun addPlaylist(playlist: Playlist): Long = playlistDao.insertPlaylist(playlist)
+
+    suspend fun updatePlaylist(playlist: Playlist) = playlistDao.updatePlaylist(playlist)
+
+    suspend fun deletePlaylist(playlist: Playlist) = playlistDao.deletePlaylist(playlist)
+
+    suspend fun playlistCount(): Int = playlistDao.getPlaylistCount()
+
+    suspend fun urlExists(url: String): Boolean = playlistDao.countByUrl(url) > 0
 }
