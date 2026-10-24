@@ -65,6 +65,7 @@ import coil.request.ImageRequest
 import com.veyra.tv.model.Channel
 import com.veyra.tv.ui.VideoPlayer
 import com.veyra.tv.ui.SettingsScreen
+import com.veyra.tv.ui.PlaylistManagerScreen
 import com.veyra.tv.data.updater.UpdateInfo
 import com.veyra.tv.data.updater.UpdateManager
 import com.veyra.tv.ui.components.UpdateDialog
@@ -117,6 +118,9 @@ fun AppNavigation(viewModel: MainViewModel) {
                     },
                     onSettingsClick = {
                         navController.navigate("settings")
+                    },
+                    onPlaylistsClick = {
+                        navController.navigate("playlists")
                     }
                 )
             }
@@ -138,6 +142,12 @@ fun AppNavigation(viewModel: MainViewModel) {
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable("playlists") {
+                PlaylistManagerScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }
@@ -147,7 +157,8 @@ fun AppNavigation(viewModel: MainViewModel) {
 fun HomeScreen(
     viewModel: MainViewModel,
     onChannelClick: (Channel) -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onPlaylistsClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isTv = isTV(context)
@@ -436,6 +447,21 @@ fun HomeScreen(
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
                 
+                var isPlaylistFocused by remember { mutableStateOf(false) }
+                ListItem(
+                    headlineContent = { Text("Manage Playlists", color = if (isPlaylistFocused) MaterialTheme.colorScheme.primary else Color.White) },
+                    leadingContent = { Icon(Icons.Default.PlaylistPlay, contentDescription = null, tint = if (isPlaylistFocused) MaterialTheme.colorScheme.primary else Color.White) },
+                    modifier = Modifier
+                        .clickable {
+                            showBottomSheet = false
+                            onPlaylistsClick()
+                        }
+                        .onFocusChanged { isPlaylistFocused = it.isFocused }
+                        .background(if (isPlaylistFocused) Color.White.copy(alpha = 0.1f) else Color.Transparent)
+                        .padding(horizontal = 8.dp),
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+
                 var isItem3Focused by remember { mutableStateOf(false) }
                 ListItem(
                     headlineContent = { Text("App Settings", color = if (isItem3Focused) MaterialTheme.colorScheme.primary else Color.White) },
