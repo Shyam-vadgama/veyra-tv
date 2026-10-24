@@ -2,6 +2,7 @@ package com.veyra.tv.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.database.sqlite.SQLiteConstraintException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -16,9 +17,11 @@ import com.veyra.tv.data.XtreamCodes
 import com.veyra.tv.model.Channel
 import com.veyra.tv.model.Playlist
 import com.veyra.tv.model.PlaylistKind
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.coroutines.coroutineContext
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val database = AppDatabase.getDatabase(application)
@@ -221,16 +224,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     fun syncPlaylist(playlist: Playlist) {
-        if (isSyncing.value) return
+        // A newer request always wins; the old job's finally block checks the
+        // identity of the current job before clearing the shared flag.
         parsingJob?.cancel()
+        _isSyncing.value = true
         parsingJob = viewModelScope.launch {
-            _isSyncing.value = true
+            val currentJob = coroutineContext[Job]
             try {
-                repository.streamAndSaveChannels(playlist)
+                val loaded = repository.streamAndSaveChannels(playlist)
+                if (!loaded) {
+                    _playlistError.value = "Couldn't load \"${playlist.name}\". Check the URL or your login details."
+                }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 e.printStackTrace()
+                _playlistError.value = "Couldn't load \"${playlist.name}\". Check the URL or your login details."
             } finally {
-                _isSyncing.value = false
+                if (parsingJob === currentJob) {
+                    parsingJob = null
+                    _isSyncing.value = false
+                }
             }
         }
     }
@@ -304,17 +318,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         if (existing == null) {
-            val newId = repository.addPlaylist(
-                Playlist(
-                    name = trimmedName,
-                    url = resolvedUrl,
-                    kind = kind,
-                    serverUrl = resolvedServer,
-                    username = resolvedUser,
-                    password = resolvedPassword,
-                    epgUrl = resolvedEpg
-                )
-            ).toInt()
+            val newId = try {
+                repository.addPlaylist(
+                    Playlist(
+                        name = trimmedName,
+                        url = resolvedUrl,
+                        kind = kind,
+                        serverUrl = resolvedServer,
+                        username = resolvedUser,
+                        password = resolvedPassword,
+                        epgUrl = resolvedEpg
+                    )
+                ).toInt()
+            } catch (e: SQLiteConstraintException) {
+                // The unique URL index caught a concurrent duplicate.
+                _playlistError.value = "That playlist is already added"
+                return false
+            }
             if (repository.playlistCount() == 1) {
                 repository.selectPlaylist(newId)
                 syncPlaylist(
@@ -332,17 +352,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
         } else {
-            repository.updatePlaylist(
-                existing.copy(
-                    name = trimmedName,
-                    url = resolvedUrl,
-                    kind = kind,
-                    serverUrl = resolvedServer,
-                    username = resolvedUser,
-                    password = resolvedPassword,
-                    epgUrl = resolvedEpg
-                )
+            val urlChanged = existing.url != resolvedUrl
+            val updated = existing.copy(
+                name = trimmedName,
+                url = resolvedUrl,
+                kind = kind,
+                serverUrl = resolvedServer,
+                username = resolvedUser,
+                password = resolvedPassword,
+                epgUrl = resolvedEpg
             )
+            try {
+                repository.updatePlaylist(updated)
+            } catch (e: SQLiteConstraintException) {
+                _playlistError.value = "That playlist is already added"
+                return false
+            }
+
+            // Old channels belong to the old source; drop them so the next use
+            // fetches the new URL instead of silently playing stale streams.
+            if (urlChanged) {
+                database.channelDao().clearChannelsForPlaylist(existing.id)
+                val stillSelected = repository.selectedPlaylist.first()?.id == existing.id
+                if (stillSelected) {
+                    syncPlaylist(updated.copy(isSelected = true))
+                }
+            }
         }
         return true
     }
@@ -350,6 +385,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun deletePlaylist(playlist: Playlist) {
         viewModelScope.launch {
             val wasSelected = repository.selectedPlaylist.first()?.id == playlist.id
+            if (wasSelected) {
+                // Stop any in-flight download for the playlist being removed.
+                parsingJob?.cancel()
+                parsingJob = null
+                _isSyncing.value = false
+            }
             repository.deletePlaylist(playlist)
 
             if (wasSelected) {

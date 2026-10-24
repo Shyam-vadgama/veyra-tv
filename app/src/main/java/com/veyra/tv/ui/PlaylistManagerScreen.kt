@@ -182,6 +182,7 @@ fun PlaylistManagerScreen(
     if (showEditor) {
         AddEditPlaylistDialog(
             initial = editing,
+            error = error,
             onDismiss = {
                 showEditor = false
                 editing = null
@@ -313,6 +314,7 @@ private fun ErrorBanner(message: String, onDismiss: () -> Unit) {
 @Composable
 private fun AddEditPlaylistDialog(
     initial: Playlist?,
+    error: String?,
     onDismiss: () -> Unit,
     onSave: (name: String, kind: PlaylistKind, m3uUrl: String, server: String, username: String, password: String) -> Unit
 ) {
@@ -411,6 +413,15 @@ private fun AddEditPlaylistDialog(
                         color = Color.Gray,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
+                error?.let { message ->
+                    Text(
+                        text = message,
+                        color = Color(0xFFFFB4B4),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 12.dp)
                     )
                 }
 

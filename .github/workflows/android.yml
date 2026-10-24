@@ -20,3 +20,5 @@ jobs:
         run: chmod +x ./gradlew
       - name: Unit tests and debug build
         run: ./gradlew :app:testDebugUnitTest :app:assembleDebug --stacktrace
+      - name: Release build (R8)
+        run: ./gradlew :app:assembleRelease --stacktrace

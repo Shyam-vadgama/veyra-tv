@@ -1,11 +1,15 @@
 package com.veyra.tv.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 enum class PlaylistKind { M3U, XTREAM }
 
-@Entity(tableName = "playlists")
+@Entity(
+    tableName = "playlists",
+    indices = [Index(value = ["url"], unique = true)]
+)
 data class Playlist(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

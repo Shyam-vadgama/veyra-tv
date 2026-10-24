@@ -9,7 +9,7 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlists")
     fun getAllPlaylists(): Flow<List<Playlist>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertPlaylist(playlist: Playlist): Long
 
     @Query("SELECT COUNT(*) FROM playlists")
@@ -32,6 +32,10 @@ interface PlaylistDao {
 
     @Query("UPDATE playlists SET isSelected = 1 WHERE id = :playlistId")
     suspend fun selectPlaylist(playlistId: Int)
+
+    /** Clears the old selection and sets the new one in a single atomic statement. */
+    @Query("UPDATE playlists SET isSelected = CASE WHEN id = :playlistId THEN 1 ELSE 0 END")
+    suspend fun selectOnly(playlistId: Int)
 
     @Query("SELECT * FROM playlists WHERE isSelected = 1 LIMIT 1")
     fun getSelectedPlaylist(): Flow<Playlist?>

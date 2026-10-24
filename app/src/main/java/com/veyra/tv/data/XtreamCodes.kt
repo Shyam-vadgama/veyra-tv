@@ -1,5 +1,7 @@
 package com.veyra.tv.data
 
+import java.net.URLEncoder
+
 /**
  * Helpers for the Xtream Codes login format.
  *
@@ -17,14 +19,17 @@ object XtreamCodes {
         return withScheme.trimEnd('/')
     }
 
+    private fun encode(value: String): String =
+        URLEncoder.encode(value, Charsets.UTF_8.name())
+
     fun buildPlaylistUrl(server: String, username: String, password: String): String {
         val base = normalizeServer(server)
-        return "$base/get.php?username=$username&password=$password&type=m3u_plus&output=ts"
+        return "$base/get.php?username=${encode(username)}&password=${encode(password)}&type=m3u_plus&output=ts"
     }
 
     fun buildEpgUrl(server: String, username: String, password: String): String {
         val base = normalizeServer(server)
-        return "$base/xmltv.php?username=$username&password=$password"
+        return "$base/xmltv.php?username=${encode(username)}&password=${encode(password)}"
     }
 
     fun isXtreamUrl(url: String): Boolean =

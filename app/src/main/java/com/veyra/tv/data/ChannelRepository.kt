@@ -26,7 +26,7 @@ class ChannelRepository(
         playlistDao.insertPlaylists(defaultPlaylists)
     }
 
-    suspend fun streamAndSaveChannels(playlist: Playlist) {
+    suspend fun streamAndSaveChannels(playlist: Playlist): Boolean {
         // Keep favorites in memory before clearing
         val currentFavorites = try {
             channelDao.getFavoriteChannelsSync(playlist.id).map { it.streamUrl }.toSet()
@@ -45,7 +45,7 @@ class ChannelRepository(
             channelDao.insertChannels(processedChunk)
         }
 
-        if (playlist.url == "internal://debug") {
+        return if (playlist.url == "internal://debug") {
             parser.parseString(DebugChannels.m3uContent, playlist.id, onChunkLoaded)
         } else if (playlist.url.endsWith(".json", ignoreCase = true)) {
             jsonParser.parseStream(playlist.url, playlist.id, onChunkLoaded)
@@ -59,8 +59,7 @@ class ChannelRepository(
     }
 
     suspend fun selectPlaylist(playlistId: Int) {
-        playlistDao.clearAllSelections()
-        playlistDao.selectPlaylist(playlistId)
+        playlistDao.selectOnly(playlistId)
     }
 
     suspend fun findAlternativeChannels(channelName: String, excludeStreamUrl: String): List<Channel> {

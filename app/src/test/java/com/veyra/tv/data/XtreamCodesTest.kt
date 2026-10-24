@@ -28,6 +28,20 @@ class XtreamCodesTest {
         )
     }
 
+    @Test fun build_playlist_url_encodes_credentials() {
+        assertEquals(
+            "http://h/get.php?username=a%26b&password=p%23w+d&type=m3u_plus&output=ts",
+            XtreamCodes.buildPlaylistUrl("http://h", "a&b", "p#w d")
+        )
+    }
+
+    @Test fun build_epg_url_encodes_credentials() {
+        assertEquals(
+            "http://h/xmltv.php?username=a%26b&password=p%23w+d",
+            XtreamCodes.buildEpgUrl("http://h", "a&b", "p#w d")
+        )
+    }
+
     @Test fun detects_xtream_urls() {
         assertTrue(XtreamCodes.isXtreamUrl("http://h/get.php?username=u&password=p&type=m3u_plus"))
         assertFalse(XtreamCodes.isXtreamUrl("http://h/iptv/index.m3u"))
