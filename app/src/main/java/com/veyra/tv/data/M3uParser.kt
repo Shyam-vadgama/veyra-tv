@@ -26,19 +26,23 @@ class M3uParser {
                 .build()
             
             val response = client.newCall(request).execute()
-            if (!response.isSuccessful) return@withContext false
+            try {
+                if (!response.isSuccessful) return@withContext false
 
-            val body = response.body ?: return@withContext false
-            
-            // A 200 response can still be an error page; treat "no channels"
-            // as a failed sync so the UI can tell the user instead of blanking.
-            var channelCount = 0
-            val countingSink: suspend (List<Channel>) -> Unit = { chunk ->
-                channelCount += chunk.size
-                onChunkLoaded(chunk)
+                val body = response.body ?: return@withContext false
+                
+                // A 200 response can still be an error page; treat "no channels"
+                // as a failed sync so the UI can tell the user instead of blanking.
+                var channelCount = 0
+                val countingSink: suspend (List<Channel>) -> Unit = { chunk ->
+                    channelCount += chunk.size
+                    onChunkLoaded(chunk)
+                }
+                parseInputStream(body, playlistId, countingSink)
+                channelCount > 0
+            } finally {
+                response.close()
             }
-            parseInputStream(body, playlistId, countingSink)
-            channelCount > 0
             
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e

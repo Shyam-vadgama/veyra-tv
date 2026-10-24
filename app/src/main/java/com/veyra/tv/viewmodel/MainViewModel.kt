@@ -232,7 +232,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val currentJob = coroutineContext[Job]
             try {
                 val loaded = repository.streamAndSaveChannels(playlist)
-                if (!loaded) {
+                if (loaded) {
+                    _playlistError.value = null
+                } else {
                     _playlistError.value = "Couldn't load \"${playlist.name}\". Check the URL or your login details."
                 }
             } catch (e: CancellationException) {
@@ -372,10 +374,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             // Old channels belong to the old source; drop them so the next use
             // fetches the new URL instead of silently playing stale streams.
             if (urlChanged) {
-                database.channelDao().clearChannelsForPlaylist(existing.id)
                 val stillSelected = repository.selectedPlaylist.first()?.id == existing.id
                 if (stillSelected) {
+                    // Sync without pre-clearing: ChannelRepository snapshots
+                    // favorites before it clears, so an http->https mirror edit
+                    // keeps favorites on identical stream URLs.
                     syncPlaylist(updated.copy(isSelected = true))
+                } else {
+                    database.channelDao().clearChannelsForPlaylist(existing.id)
                 }
             }
         }

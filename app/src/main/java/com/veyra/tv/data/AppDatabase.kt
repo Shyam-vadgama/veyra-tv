@@ -28,9 +28,10 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE playlists ADD COLUMN password TEXT")
                 db.execSQL("ALTER TABLE playlists ADD COLUMN epgUrl TEXT")
 
-                // Collapse any duplicate URLs created before the unique index existed
-                // (channels cascade-delete with their playlist), then enforce uniqueness.
+                // Collapse any duplicate URLs created before the unique index existed.
                 db.execSQL("DELETE FROM playlists WHERE id NOT IN (SELECT MIN(id) FROM playlists GROUP BY url)")
+                // Foreign keys are enabled after onUpgrade, so remove orphans explicitly.
+                db.execSQL("DELETE FROM channels WHERE playlistId NOT IN (SELECT id FROM playlists)")
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_playlists_url ON playlists(url)")
             }
         }

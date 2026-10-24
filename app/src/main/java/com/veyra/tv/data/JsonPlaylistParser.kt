@@ -27,18 +27,22 @@ class JsonPlaylistParser {
                 .build()
             
             val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                Log.e("JsonPlaylistParser", "Network error: ${response.code}")
-                return@withContext false
-            }
+            try {
+                if (!response.isSuccessful) {
+                    Log.e("JsonPlaylistParser", "Network error: ${response.code}")
+                    return@withContext false
+                }
 
-            val body = response.body
-            if (body == null) {
-                Log.e("JsonPlaylistParser", "Empty body")
-                return@withContext false
+                val body = response.body
+                if (body == null) {
+                    Log.e("JsonPlaylistParser", "Empty body")
+                    return@withContext false
+                }
+                
+                parseJsonStream(body, playlistId, onChunkLoaded)
+            } finally {
+                response.close()
             }
-            
-            parseJsonStream(body, playlistId, onChunkLoaded)
             
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
@@ -61,20 +65,25 @@ class JsonPlaylistParser {
         return try {
             reader.beginArray()
             while (reader.hasNext()) {
-                try {
-                    val channel = readChannel(reader, playlistId)
-                    if (channel != null) {
-                        chunk.add(channel)
-                        count++
-                    }
-
-                    if (chunk.size >= chunkSize) {
-                        onChunkLoaded(chunk.toList())
-                        chunk.clear()
-                    }
+                val channel = try {
+                    readChannel(reader, playlistId)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
                 } catch (e: Exception) {
-                    // Skip malformed item
+                    // Skip only the malformed item. Insert/cancellation failures
+                    // from onChunkLoaded must reach the outer handler.
                     Log.e("JsonPlaylistParser", "Error parsing item", e)
+                    null
+                }
+
+                if (channel != null) {
+                    chunk.add(channel)
+                    count++
+                }
+
+                if (chunk.size >= chunkSize) {
+                    onChunkLoaded(chunk.toList())
+                    chunk.clear()
                 }
             }
             reader.endArray()
@@ -83,7 +92,7 @@ class JsonPlaylistParser {
                 onChunkLoaded(chunk.toList())
             }
             Log.d("JsonPlaylistParser", "Parsed $count channels")
-            true
+            count > 0
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: Exception) {
